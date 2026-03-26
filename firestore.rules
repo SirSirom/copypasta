@@ -1,21 +1,15 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Users can read and write their own user document
-    match /users/{userId} {
+    // Allow any authenticated user to read/write their own data
+    match /users/{userId}/snippets/{document=**} {
       allow read, write: if request.auth != null && request.auth.uid == userId;
     }
     
-    // Users can read and write their own snippets
-    match /snippets/{snippetId} {
-      allow read, write: if request.auth != null && resource.data.userId == request.auth.uid;
-      allow create: if request.auth != null && request.auth.uid == request.resource.data.userId;
-    }
-    
-    // Allow reading public snippets (if we add a public feature later)
-    match /publicSnippets/{snippetId} {
+    // Support for public snippets (optional)
+    match /publicSnippets/{document=**} {
       allow read: if true;
-      allow write: if false; // No writes to public snippets for now
+      allow write: if false;
     }
   }
 }
